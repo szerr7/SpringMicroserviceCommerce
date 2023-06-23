@@ -34,6 +34,5 @@ return (args) -> {
 	inventoryRepository.save(inventory1);
 
 } ;
-
-}
+	}
 }
