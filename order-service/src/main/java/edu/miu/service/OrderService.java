@@ -3,9 +3,12 @@ package edu.miu.service;
 import edu.miu.dto.InventoryResponse;
 import edu.miu.dto.OrderLineItemsDto;
 import edu.miu.dto.OrderRequest;
+import edu.miu.event.OrderPlacedEvent;
 import edu.miu.model.Order;
 import edu.miu.model.OrderLineItems;
 import edu.miu.repository.OrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -21,6 +24,10 @@ public class OrderService {
     private final OrderRepository orderRepository;
 
     private final WebClient.Builder webClientBuilder;
+
+
+    @Autowired
+    private KafkaTemplate<String ,OrderPlacedEvent>  kafkaTemplate;
 
 
     public OrderService(OrderRepository orderRepository, WebClient.Builder webClientBuilder) {
@@ -57,16 +64,14 @@ public class OrderService {
 
         if (allProductsInStock){
             orderRepository.save(order);
+            kafkaTemplate.send("notificationTopic", new OrderPlacedEvent(order.getOrderNumber()));  //send order to kafka topic
+            return "Order Placed Successfully";
         }
 
 
         else{
             throw new RuntimeException("Items are not in stock");
         }
-
-        return "Order Placed Successfully";
-
-
     }
 
     private OrderLineItems mapToDto(OrderLineItemsDto orderLineItemsDto) {

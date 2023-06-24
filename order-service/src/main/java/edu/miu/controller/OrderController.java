@@ -21,25 +21,30 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-
-//    public String placeOrder(@RequestBody OrderRequest orderRequest){
-//         orderService.placeOrder(orderRequest);
-//            return "Order Placed Successfully";
-//    }
-
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    @CircuitBreaker(name = "inventory" , fallbackMethod = "fallbackMethod")
-    @TimeLimiter(name = "inventory")
-    @Retry(name = "inventory")
-    public CompletableFuture<String> placeOrder(@RequestBody OrderRequest orderRequest){
-        return CompletableFuture.supplyAsync(()->orderService.placeOrder(orderRequest));
-
+    public String placeOrder(@RequestBody OrderRequest orderRequest){
+         orderService.placeOrder(orderRequest);
+            return "Order Placed Successfully";
     }
 
+//    @PostMapping
+//    @ResponseStatus(HttpStatus.CREATED)
+//    @CircuitBreaker(name = "inventory" , fallbackMethod = "fallbackMethod")
+//    @TimeLimiter(name = "inventory")
+//    @Retry(name = "inventory")
+//    public CompletableFuture<String> placeOrder(@RequestBody OrderRequest orderRequest){
+//        return CompletableFuture.supplyAsync(()->orderService.placeOrder(orderRequest));
+//
+//    }
 
-    public CompletableFuture<String>fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException){
-        return CompletableFuture.supplyAsync(()->"Oops! Something went wrong. Please try again later");
+
+//    public CompletableFuture<String>fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException){
+//        return CompletableFuture.supplyAsync(()->"Oops! Something went wrong. Please try again later");
+//    }
+
+    public String fallbackMethod(OrderRequest orderRequest, RuntimeException runtimeException){
+        return "Oops! Something went wrong. Please try again later";
     }
 
 }
